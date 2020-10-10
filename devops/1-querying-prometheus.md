@@ -58,9 +58,18 @@ We should now have a single time-series, displaying the number of successful req
 ### Exercises
 
 - What's the overall request rate (with a 1 minute rolling-window) for the http-simulator service?
+1037.111111111111
 - How many requests per minute are errors?
-- What's the error rate (in %) of requests to the /users endpoint?
 
+21.84444444444444
+
+- What's the error rate (in %) of requests to the /users endpoint?
+sum(rate(http_requests_total{app="http-simulator",status="500"}[30m]))/sum(rate(http_requests_total{app="http-simulator"}[30m]))*100
+
+1.9981216247945526%
+
+
+[] Operator is Sliding Window - so it calcualtes it from now---> - 30mins
 ## Latency distribution
 
 Latency cannot be accurately measured through sums and averages, because it's a distribution problem. The `http-simulator` exposes an _Histogram_ metric for this purpose, called `http_request_duration_milliseconds`. Histogram metrics are actually multiple metrics, with the `_buckets` suffix.
@@ -81,16 +90,47 @@ These can be useful to derive rates out of the buckets. Let's imagine our login 
 
     sum(http_request_duration_milliseconds_bucket{app="http-simulator", status="200", endpoint="/login", le="200"}) / sum(http_request_duration_milliseconds_count{app="http-simulator", status="200", endpoint="/login"}) * 100
 
+
+
+    sum(rate(http_request_duration_milliseconds_bucket{app="http-simulator", status="200", endpoint="/login", le="200"}[5m])) / sum(rate(http_request_duration_milliseconds_bucket{app="http-simulator", status="200", endpoint="/login", le="+Inf"}[5m])) * 100
+
+    This is the query that returns data for a 5min timewindow as well
+
 Another approach is to query Prometheus for the actual 99-percentile, using the `histogram_quantile()` function:
 
     histogram_quantile(0.99, rate(http_request_duration_milliseconds_bucket{app="http-simulator", status="200", endpoint="/login"}[5m]))
 
 This percentile tells us how many milliseconds are needed for 99% of all successful login requests to return.
 
-What does it look like for the 90th percentile?
+1528.6841710427586
+
+
+
+What does it look like for the 90th percentile? ---> how many milliseconds are needed
+
+histogram_quantile(0.90,rate(http_request_duration_milliseconds_bucket{app="http-simulator", status="200", endpoint="/login"}[5m]))
+
+198.20035349072074
+
 
 ### Exercises
 
 - What is the median latency of all requests to the http-simulator service?
+50% are lower than 32.43
+
+histogram_quantile(0.50, sum by (le) (http_request_duration_milliseconds_bucket{app="http-simulator"}))
+
 - What is the 90-percentile latency of all error requests to the http-simulator service, for each endpoint?
+
+histogram_quantile(0.90, (http_request_duration_milliseconds_bucket{app="http-simulator",status="500"}))
+
 - Does the `/users` endpoint fulfill the SLO of _3 Nines_ requests responding within 400ms?
+
+No :/
+
+
+histogram_quantile(0.999, sum by (le) (http_request_duration_milliseconds_bucket{app="http-simulator",endpoint="/users"}))
+
+or
+
+histogram_quantile(0.999,rate(http_request_duration_milliseconds_bucket{app="http-simulator", status="200", endpoint="/login"}[5m]))
