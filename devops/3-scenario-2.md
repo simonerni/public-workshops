@@ -20,5 +20,11 @@ Don't forget that `sum`, `rate` and `by` are your friends.
 ## Exercise
 
 - Can you find the guilty namespace?
+
+memory-leak
 - Can you find the guilty pod?
+memory-leak-59ff9fcfd5-4ds78 => memory-leak:python-processor
+
 - What is interesting about the graph?
+
+It is clearly a memory leak, it rises and falls again sharply - probably crashes.

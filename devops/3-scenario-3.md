@@ -17,5 +17,7 @@ There will be a lot of noise as we record many metrics, you can filter the metri
 ## Exercise
 
 - What counter has increased that tells us something happened?
+Container Last Seen
+
 - What does that mean?
 - Why is there or (can there be) a gap between the lines?

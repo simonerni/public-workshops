@@ -35,7 +35,46 @@ Select the `productpage` _Service_ and click _Find Traces_
 ## Exercise
 
 - Which service is responsible for the issue?
+
+reviews.bookinfo.svc.cluster.local:9080/*
+
+
 - Can you make some assumptions about the way the product page service works?
+
+The productpage service calls:
+
+- Details Service
+- Reviews Service
+    - Ratings Service
+
+
+
 - Do you think the product page service has any timeouts?
+
+Yeah, so the productpage has a 3s timeout, but the service takes 4s
+
 - Do you think the product page service has any retries?
+
+Yeah it tries 2 times
+
+
+
+Fast:
+
+{
+  "key": "node_id",
+  "type": "string",
+  "value": "sidecar~172.31.33.229~reviews-v2-7f56f48fc5-vptpw.bookinfo~bookinfo.svc.cluster.local"
+
+
+
+"sidecar~172.31.33.229~reviews-v2-7f56f48fc5-vptpw.bookinfo~bookinfo.svc.cluster.local"
+
 - Can you use the Istio Workload Dashboard Grafana to see the same results? Try setting _Namespace_ to _bookinfo_ and _Workload_ to _productpage_v1_ and see if you can spot the service which is the culprit.
+
+Yeah, you can go to outbound services, and see in the "outgoing request duration by destination" that the *reviews* service is the culprit.
+
+
+
+# Cool Visualization of Traffic
+http://kiali.workshop.devops.beekeeper.rocks/

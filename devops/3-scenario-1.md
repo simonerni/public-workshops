@@ -11,4 +11,8 @@ Try typing _node_ in the query field and let the autocomplete help you find the 
 ## Exercise
 
 - How much free disk space is left on the node?
+around (8 GB)
+
 - When did the high disk usage start?
+
+Hmm. Hard to tell - maybe today around at 15:10, when the workshop started
